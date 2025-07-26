@@ -1,5 +1,5 @@
 import { auth } from 'lib/auth';
-import { getCurrentMerchant } from 'lib/config';
+import { getOrCreateMerchant } from 'lib/merchants';
 import { getOrders } from 'lib/orders';
 import { getProductsByMerchant } from 'lib/products';
 import { headers } from 'next/headers';
@@ -20,10 +20,17 @@ export default async function MerchantDashboardPage() {
     redirect('/merchant/login');
   }
 
-  // Get current merchant and their data
-  const merchant = await getCurrentMerchant();
-  const products = await getProductsByMerchant(merchant?.id || '');
-  const orders = await getOrders({ merchantId: merchant?.id });
+  // Get or create merchant and check onboarding status
+  const merchant = await getOrCreateMerchant(session.user.id);
+
+  // Redirect to onboarding if not completed
+  if (!merchant.isOnboarded) {
+    redirect('/merchant/onboarding');
+  }
+
+  // Get merchant data
+  const products = await getProductsByMerchant(merchant.id);
+  const orders = await getOrders({ merchantId: merchant.id });
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -76,6 +83,14 @@ export default async function MerchantDashboardPage() {
               <div>
                 <p className="text-sm text-gray-600">Address</p>
                 <p className="font-medium">{merchant.businessInfo?.address}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Phone</p>
+                <p className="font-medium">{merchant.businessInfo?.phoneNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Category</p>
+                <p className="font-medium">{merchant.businessInfo?.category}</p>
               </div>
             </div>
           </div>

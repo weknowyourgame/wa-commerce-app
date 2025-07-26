@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./db";
+import { getOrCreateMerchant } from "./merchants";
 
 export const auth = betterAuth({
   // Use your existing Prisma client
@@ -39,8 +40,15 @@ export const auth = betterAuth({
       return true;
     },
     
-    // Customize session data
-    session: (session, user) => {
+    // Customize session data and create merchant record
+    session: async (session, user) => {
+      // Create merchant record if it doesn't exist
+      try {
+        await getOrCreateMerchant(user.id);
+      } catch (error) {
+        console.error('Error creating merchant record:', error);
+      }
+
       return {
         ...session,
         user: {
