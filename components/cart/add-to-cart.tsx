@@ -3,17 +3,14 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { addItem } from 'components/cart/actions';
-import { useProduct } from 'components/product/product-context';
-import { Product, ProductVariant } from 'lib/shopify/types';
+import type { ProductWithMerchant } from 'lib/types';
 import { useActionState } from 'react';
 import { useCart } from './cart-context';
 
 function SubmitButton({
-  availableForSale,
-  selectedVariantId
+  availableForSale
 }: {
   availableForSale: boolean;
-  selectedVariantId: string | undefined;
 }) {
   const buttonClasses =
     'relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white';
@@ -23,21 +20,6 @@ function SubmitButton({
     return (
       <button disabled className={clsx(buttonClasses, disabledClasses)}>
         Out Of Stock
-      </button>
-    );
-  }
-
-  if (!selectedVariantId) {
-    return (
-      <button
-        aria-label="Please select an option"
-        disabled
-        className={clsx(buttonClasses, disabledClasses)}
-      >
-        <div className="absolute left-0 ml-4">
-          <PlusIcon className="h-5" />
-        </div>
-        Add To Cart
       </button>
     );
   }
@@ -57,35 +39,22 @@ function SubmitButton({
   );
 }
 
-export function AddToCart({ product }: { product: Product }) {
-  const { variants, availableForSale } = product;
+export function AddToCart({ product }: { product: ProductWithMerchant }) {
   const { addCartItem } = useCart();
-  const { state } = useProduct();
   const [message, formAction] = useActionState(addItem, null);
 
-  const variant = variants.find((variant: ProductVariant) =>
-    variant.selectedOptions.every(
-      (option) => option.value === state[option.name.toLowerCase()]
-    )
-  );
-  const defaultVariantId = variants.length === 1 ? variants[0]?.id : undefined;
-  const selectedVariantId = variant?.id || defaultVariantId;
-  const addItemAction = formAction.bind(null, selectedVariantId);
-  const finalVariant = variants.find(
-    (variant) => variant.id === selectedVariantId
-  )!;
+  // For now, we'll assume all products are available for sale
+  // You can add an availableForSale field to your Product model if needed
+  const availableForSale = true;
 
   return (
     <form
       action={async () => {
-        addCartItem(finalVariant, product);
-        addItemAction();
+        addCartItem(product);
+        formAction();
       }}
     >
-      <SubmitButton
-        availableForSale={availableForSale}
-        selectedVariantId={selectedVariantId}
-      />
+      <SubmitButton availableForSale={availableForSale} />
       <p aria-live="polite" className="sr-only" role="status">
         {message}
       </p>

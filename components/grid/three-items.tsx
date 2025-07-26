@@ -1,6 +1,6 @@
 import { GridTileImage } from 'components/grid/tile';
-import { getCollectionProducts } from 'lib/shopify';
-import type { Product } from 'lib/shopify/types';
+import { getFeaturedProducts } from 'lib/products';
+import type { ProductWithMerchant } from 'lib/types';
 import Link from 'next/link';
 
 function ThreeItemGridItem({
@@ -8,7 +8,7 @@ function ThreeItemGridItem({
   size,
   priority
 }: {
-  item: Product;
+  item: ProductWithMerchant;
   size: 'full' | 'half';
   priority?: boolean;
 }) {
@@ -18,22 +18,22 @@ function ThreeItemGridItem({
     >
       <Link
         className="relative block aspect-square h-full w-full"
-        href={`/product/${item.handle}`}
+        href={`/product/${item.id}`}
         prefetch={true}
       >
         <GridTileImage
-          src={item.featuredImage.url}
+          src={item.imageUrl || 'https://via.placeholder.com/500x500?text=Product+Image'}
           fill
           sizes={
             size === 'full' ? '(min-width: 768px) 66vw, 100vw' : '(min-width: 768px) 33vw, 100vw'
           }
           priority={priority}
-          alt={item.title}
+          alt={item.name}
           label={{
             position: size === 'full' ? 'center' : 'bottom',
-            title: item.title as string,
-            amount: item.priceRange.maxVariantPrice.amount,
-            currencyCode: item.priceRange.maxVariantPrice.currencyCode
+            title: item.name,
+            amount: item.price.toString(),
+            currencyCode: 'INR'
           }}
         />
       </Link>
@@ -42,10 +42,7 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  // Collections that start with `hidden-*` are hidden from the search page.
-  const homepageItems = await getCollectionProducts({
-    collection: 'hidden-homepage-featured-items'
-  });
+  const homepageItems = await getFeaturedProducts(3);
 
   if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
 

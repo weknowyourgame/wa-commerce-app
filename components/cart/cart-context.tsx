@@ -1,11 +1,6 @@
 'use client';
 
-import type {
-  Cart,
-  CartItem,
-  Product,
-  ProductVariant
-} from 'lib/shopify/types';
+import type { ProductWithMerchant } from 'lib/types';
 import React, {
   createContext,
   use,
@@ -14,16 +9,30 @@ import React, {
   useOptimistic
 } from 'react';
 
+export type CartItem = {
+  id: string;
+  product: ProductWithMerchant;
+  quantity: number;
+  price: number;
+};
+
+export type Cart = {
+  id?: string;
+  items: CartItem[];
+  totalQuantity: number;
+  totalAmount: number;
+};
+
 type UpdateType = 'plus' | 'minus' | 'delete';
 
 type CartAction =
   | {
       type: 'UPDATE_ITEM';
-      payload: { merchandiseId: string; updateType: UpdateType };
+      payload: { productId: string; updateType: UpdateType };
     }
   | {
       type: 'ADD_ITEM';
-      payload: { variant: ProductVariant; product: Product };
+      payload: { product: ProductWithMerchant };
     };
 
 type CartContextType = {
@@ -31,10 +40,6 @@ type CartContextType = {
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
-
-function calculateItemCost(quantity: number, price: string): string {
-  return (Number(price) * quantity).toString();
-}
 
 function updateCartItem(
   item: CartItem,
@@ -46,87 +51,45 @@ function updateCartItem(
     updateType === 'plus' ? item.quantity + 1 : item.quantity - 1;
   if (newQuantity === 0) return null;
 
-  const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
-  const newTotalAmount = calculateItemCost(
-    newQuantity,
-    singleItemAmount.toString()
-  );
-
   return {
     ...item,
-    quantity: newQuantity,
-    cost: {
-      ...item.cost,
-      totalAmount: {
-        ...item.cost.totalAmount,
-        amount: newTotalAmount
-      }
-    }
+    quantity: newQuantity
   };
 }
 
 function createOrUpdateCartItem(
   existingItem: CartItem | undefined,
-  variant: ProductVariant,
-  product: Product
+  product: ProductWithMerchant
 ): CartItem {
   const quantity = existingItem ? existingItem.quantity + 1 : 1;
-  const totalAmount = calculateItemCost(quantity, variant.price.amount);
 
   return {
-    id: existingItem?.id,
+    id: existingItem?.id || `${product.id}-${Date.now()}`,
+    product,
     quantity,
-    cost: {
-      totalAmount: {
-        amount: totalAmount,
-        currencyCode: variant.price.currencyCode
-      }
-    },
-    merchandise: {
-      id: variant.id,
-      title: variant.title,
-      selectedOptions: variant.selectedOptions,
-      product: {
-        id: product.id,
-        handle: product.handle,
-        title: product.title,
-        featuredImage: product.featuredImage
-      }
-    }
+    price: product.price
   };
 }
 
-function updateCartTotals(
-  lines: CartItem[]
-): Pick<Cart, 'totalQuantity' | 'cost'> {
-  const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = lines.reduce(
-    (sum, item) => sum + Number(item.cost.totalAmount.amount),
+function updateCartTotals(items: CartItem[]): Pick<Cart, 'totalQuantity' | 'totalAmount'> {
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = items.reduce(
+    (sum, item) => sum + (item.price * item.quantity),
     0
   );
-  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? 'USD';
 
   return {
     totalQuantity,
-    cost: {
-      subtotalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalTaxAmount: { amount: '0', currencyCode }
-    }
+    totalAmount
   };
 }
 
 function createEmptyCart(): Cart {
   return {
     id: undefined,
-    checkoutUrl: '',
+    items: [],
     totalQuantity: 0,
-    lines: [],
-    cost: {
-      subtotalAmount: { amount: '0', currencyCode: 'USD' },
-      totalAmount: { amount: '0', currencyCode: 'USD' },
-      totalTaxAmount: { amount: '0', currencyCode: 'USD' }
-    }
+    totalAmount: 0
   };
 }
 
@@ -135,54 +98,50 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
 
   switch (action.type) {
     case 'UPDATE_ITEM': {
-      const { merchandiseId, updateType } = action.payload;
-      const updatedLines = currentCart.lines
+      const { productId, updateType } = action.payload;
+      const updatedItems = currentCart.items
         .map((item) =>
-          item.merchandise.id === merchandiseId
+          item.product.id === productId
             ? updateCartItem(item, updateType)
             : item
         )
         .filter(Boolean) as CartItem[];
 
-      if (updatedLines.length === 0) {
+      if (updatedItems.length === 0) {
         return {
           ...currentCart,
-          lines: [],
+          items: [],
           totalQuantity: 0,
-          cost: {
-            ...currentCart.cost,
-            totalAmount: { ...currentCart.cost.totalAmount, amount: '0' }
-          }
+          totalAmount: 0
         };
       }
 
       return {
         ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines
+        ...updateCartTotals(updatedItems),
+        items: updatedItems
       };
     }
     case 'ADD_ITEM': {
-      const { variant, product } = action.payload;
-      const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id
+      const { product } = action.payload;
+      const existingItem = currentCart.items.find(
+        (item) => item.product.id === product.id
       );
       const updatedItem = createOrUpdateCartItem(
         existingItem,
-        variant,
         product
       );
 
-      const updatedLines = existingItem
-        ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item
+      const updatedItems = existingItem
+        ? currentCart.items.map((item) =>
+            item.product.id === product.id ? updatedItem : item
           )
-        : [...currentCart.lines, updatedItem];
+        : [...currentCart.items, updatedItem];
 
       return {
         ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines
+        ...updateCartTotals(updatedItems),
+        items: updatedItems
       };
     }
     default:
@@ -216,15 +175,15 @@ export function useCart() {
     cartReducer
   );
 
-  const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
+  const updateCartItem = (productId: string, updateType: UpdateType) => {
     updateOptimisticCart({
       type: 'UPDATE_ITEM',
-      payload: { merchandiseId, updateType }
+      payload: { productId, updateType }
     });
   };
 
-  const addCartItem = (variant: ProductVariant, product: Product) => {
-    updateOptimisticCart({ type: 'ADD_ITEM', payload: { variant, product } });
+  const addCartItem = (product: ProductWithMerchant) => {
+    updateOptimisticCart({ type: 'ADD_ITEM', payload: { product } });
   };
 
   return useMemo(

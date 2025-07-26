@@ -1,4 +1,4 @@
-// import { CartProvider } from 'components/cart/cart-context';
+import { CartProvider } from 'components/cart/cart-context';
 import { Navbar } from 'components/layout/navbar';
 import { WelcomeToast } from 'components/welcome-toast';
 import { GeistSans } from 'geist/font/sans';
@@ -26,20 +26,21 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // Don't await the fetch, pass the Promise to the context provider
-  // const cart = getCart();
+  // Create an empty cart promise for now
+  // In a real app, you'd fetch the cart from cookies or database
+  const cart = Promise.resolve(undefined);
 
   return (
     <html lang="en" className={GeistSans.variable}>
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        {/* <CartProvider cartPromise={cart}> */}
+        <CartProvider cartPromise={cart}>
           <Navbar />
           <main>
             {children}
             <Toaster closeButton />
             <WelcomeToast />
           </main>
-        {/* </CartProvider> */}
+        </CartProvider>
       </body>
     </html>
   );
