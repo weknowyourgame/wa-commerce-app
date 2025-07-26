@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Merchant {
+  id           String   @id @default(uuid())
+  upiNumber    String
+  apiToken     String
+  website      String
+  businessInfo Json
+  products     Product[]
+  orders       Order[]
+  webhookEvents WebhookEvent[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  imageUrl    String?
+  price       Float
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  phone     String
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  customerId  String
+  merchantId  String
+  productId   String
+  txnId       String?
+  amount      Float
+  status      OrderStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  payload     Json
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id])
+  receivedAt  DateTime @default(now())
+}
