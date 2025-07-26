@@ -94,6 +94,7 @@ export default function MobileMenu({
                     <Search />
                   </Suspense>
                 </div>
+
                 {menu.length ? (
                   <ul className="flex w-full flex-col">
                     {menu.map((item: MenuItem) => (
