@@ -3,9 +3,33 @@ const { PrismaClient } = require('../generated/prisma');
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create sample merchants
+  // Create sample users first (required for merchants)
+  const user1 = await prisma.user.create({
+    data: {
+      id: 'user-1',
+      name: 'John Tech Merchant',
+      email: 'john@techgadgets.com',
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  });
+
+  const user2 = await prisma.user.create({
+    data: {
+      id: 'user-2',
+      name: 'Sarah Fashion Merchant',
+      email: 'sarah@fashionboutique.com',
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  });
+
+  // Create sample merchants with userId
   const merchant1 = await prisma.merchant.create({
     data: {
+      userId: user1.id,
       upiNumber: 'merchant1@upi',
       apiToken: 'token1',
       website: 'https://merchant1.com',
@@ -13,13 +37,17 @@ async function main() {
         name: 'Tech Gadgets Store',
         description: 'Premium tech gadgets and accessories',
         address: '123 Tech Street, Bangalore',
-        phone: '+91-9876543210'
-      }
+        phoneNumber: '+91-9876543210',
+        category: 'Electronics'
+      },
+      isOnboarded: true,
+      onboardingStep: 4
     }
   });
 
   const merchant2 = await prisma.merchant.create({
     data: {
+      userId: user2.id,
       upiNumber: 'merchant2@upi',
       apiToken: 'token2',
       website: 'https://merchant2.com',
@@ -27,8 +55,11 @@ async function main() {
         name: 'Fashion Boutique',
         description: 'Trendy fashion and lifestyle products',
         address: '456 Fashion Avenue, Mumbai',
-        phone: '+91-9876543211'
-      }
+        phoneNumber: '+91-9876543211',
+        category: 'Fashion & Apparel'
+      },
+      isOnboarded: true,
+      onboardingStep: 4
     }
   });
 
@@ -90,9 +121,61 @@ async function main() {
     })
   ]);
 
+  // Create sample customers
+  const customer1 = await prisma.customer.create({
+    data: {
+      phone: '+91-9876543201'
+    }
+  });
+
+  const customer2 = await prisma.customer.create({
+    data: {
+      phone: '+91-9876543202'
+    }
+  });
+
+  // Create sample orders
+  const orders = await Promise.all([
+    prisma.order.create({
+      data: {
+        customerId: customer1.id,
+        merchantId: merchant1.id,
+        productId: products[0].id, // Wireless Headphones
+        amount: 2999.99,
+        status: 'CONFIRMED',
+        paidAt: new Date(),
+        txnId: 'TXN123456'
+      }
+    }),
+    prisma.order.create({
+      data: {
+        customerId: customer2.id,
+        merchantId: merchant2.id,
+        productId: products[2].id, // Designer T-Shirt
+        amount: 899.99,
+        status: 'PENDING',
+        txnId: 'TXN123457'
+      }
+    }),
+    prisma.order.create({
+      data: {
+        customerId: customer1.id,
+        merchantId: merchant1.id,
+        productId: products[1].id, // Smartphone Case
+        amount: 499.99,
+        status: 'CONFIRMED',
+        paidAt: new Date(),
+        txnId: 'TXN123458'
+      }
+    })
+  ]);
+
   console.log('Database seeded successfully!');
+  console.log('Created users:', { user1: user1.id, user2: user2.id });
   console.log('Created merchants:', { merchant1: merchant1.id, merchant2: merchant2.id });
   console.log('Created products:', products.map(p => ({ id: p.id, name: p.name })));
+  console.log('Created customers:', { customer1: customer1.id, customer2: customer2.id });
+  console.log('Created orders:', orders.map(o => ({ id: o.id, amount: o.amount, status: o.status })));
 }
 
 main()

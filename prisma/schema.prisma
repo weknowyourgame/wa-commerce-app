@@ -16,10 +16,14 @@ datasource db {
 
 model Merchant {
   id            String         @id @default(uuid())
-  upiNumber     String
-  apiToken      String
-  website       String
-  businessInfo  Json
+  userId        String         @unique // Link to Better Auth User
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upiNumber     String?
+  apiToken      String         @default(uuid())
+  website       String?
+  businessInfo  Json?
+  isOnboarded   Boolean        @default(false)
+  onboardingStep Int           @default(0)
   products      Product[]
   orders        Order[]
   webhookEvents WebhookEvent[]
@@ -85,6 +89,7 @@ model User {
   email         String
   emailVerified Boolean
   image         String?
+  merchant      Merchant?
   createdAt     DateTime
   updatedAt     DateTime
   sessions      Session[]
