@@ -1,5 +1,5 @@
 import { CartProvider } from 'components/cart/cart-context';
-import { Navbar } from 'components/layout/navbar';
+import { NavbarWrapper } from 'components/layout/navbar-wrapper';
 import { WelcomeToast } from 'components/welcome-toast';
 import { GeistSans } from 'geist/font/sans';
 import { getCurrentMerchant } from 'lib/config';
@@ -38,7 +38,7 @@ export default async function RootLayout({
     <html lang="en" className={GeistSans.variable}>
       <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
         <CartProvider cartPromise={cart}>
-          <Navbar merchant={currentMerchant} />
+          <NavbarWrapper merchant={currentMerchant} />
           <main>
             {children}
             <Toaster closeButton />
