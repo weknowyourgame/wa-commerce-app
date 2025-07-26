@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { Fragment, Suspense, useEffect, useState } from 'react';
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import type { MerchantWithProducts } from 'lib/types';
 import Search, { SearchSkeleton } from './search';
 
 type MenuItem = {
@@ -13,7 +14,13 @@ type MenuItem = {
   path: string;
 };
 
-export default function MobileMenu({ menu }: { menu: MenuItem[] }) {
+export default function MobileMenu({ 
+  menu, 
+  merchant 
+}: { 
+  menu: MenuItem[];
+  merchant?: MerchantWithProducts | null;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -74,6 +81,13 @@ export default function MobileMenu({ menu }: { menu: MenuItem[] }) {
                 >
                   <XMarkIcon className="h-6" />
                 </button>
+
+                {merchant && (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <h3 className="font-semibold text-sm">{merchant.businessInfo?.name}</h3>
+                    <p className="text-xs text-gray-600">{merchant.businessInfo?.description}</p>
+                  </div>
+                )}
 
                 <div className="mb-4 w-full">
                   <Suspense fallback={<SearchSkeleton />}>

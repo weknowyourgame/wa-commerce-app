@@ -1,3 +1,4 @@
+import { getCurrentMerchant } from './config';
 import { prisma } from './db';
 import type { ProductWithMerchant } from './types';
 
@@ -19,7 +20,13 @@ export async function getProducts({
     ];
   }
   
-  if (merchantId) {
+  // If no specific merchantId is provided, use the current merchant
+  if (!merchantId) {
+    const currentMerchant = await getCurrentMerchant();
+    if (currentMerchant) {
+      where.merchantId = currentMerchant.id;
+    }
+  } else {
     where.merchantId = merchantId;
   }
 
@@ -57,9 +64,17 @@ export async function getProductsByMerchant(merchantId: string): Promise<Product
 }
 
 export async function getFeaturedProducts(limit: number = 6): Promise<ProductWithMerchant[]> {
-  // For now, we'll get the most recent products as featured
-  // You can modify this logic based on your business requirements
+  // Get current merchant and filter products
+  const currentMerchant = await getCurrentMerchant();
+  
+  if (!currentMerchant) {
+    return [];
+  }
+
   return await prisma.product.findMany({
+    where: {
+      merchantId: currentMerchant.id
+    },
     include: {
       merchant: true
     },
@@ -71,8 +86,15 @@ export async function getFeaturedProducts(limit: number = 6): Promise<ProductWit
 }
 
 export async function searchProducts(query: string, limit: number = 20): Promise<ProductWithMerchant[]> {
+  const currentMerchant = await getCurrentMerchant();
+  
+  if (!currentMerchant) {
+    return [];
+  }
+
   return await prisma.product.findMany({
     where: {
+      merchantId: currentMerchant.id,
       OR: [
         { name: { contains: query, mode: 'insensitive' } },
         { description: { contains: query, mode: 'insensitive' } }

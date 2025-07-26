@@ -1,5 +1,6 @@
 import CartModal from 'components/cart/modal';
 import LogoSquare from 'components/logo-square';
+import type { MerchantWithProducts } from 'lib/types';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import MobileMenu from './mobile-menu';
@@ -14,12 +15,12 @@ const menu = [
   { title: 'About', path: '/about' }
 ];
 
-export async function Navbar() {
+export async function Navbar({ merchant }: { merchant: MerchantWithProducts | null }) {
   return (
     <nav className="relative flex items-center justify-between p-4 lg:px-6">
       <div className="block flex-none md:hidden">
         <Suspense fallback={null}>
-          <MobileMenu menu={menu} />
+          <MobileMenu menu={menu} merchant={merchant} />
         </Suspense>
       </div>
       <div className="flex w-full items-center">
@@ -31,9 +32,14 @@ export async function Navbar() {
           >
             <LogoSquare />
             <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
-              {SITE_NAME}
+              {merchant?.businessInfo?.name || SITE_NAME}
             </div>
           </Link>
+          {merchant && (
+            <div className="hidden md:block ml-4 text-xs text-gray-500">
+              {merchant.businessInfo?.description}
+            </div>
+          )}
           {menu.length ? (
             <ul className="hidden gap-6 text-sm md:flex md:items-center">
               {menu.map((item) => (
