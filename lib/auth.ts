@@ -8,7 +8,13 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   
-  // Only Google OAuth for merchant dashboard
+  // Enable email and password authentication
+  emailAndPassword: {
+    enabled: true,
+    autoSignIn: true,
+  },
+  
+  // Google OAuth for merchant dashboard
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -23,16 +29,14 @@ export const auth = betterAuth({
   
   // Callbacks
   callbacks: {
-    // Only allow specific emails for merchant access
+    // Allow all Google sign-ins for now (you can restrict this later)
     signIn: async (user) => {
-      // Add your merchant emails here
-      const allowedEmails = [
-        'merchant1@gmail.com',
-        'merchant2@gmail.com',
-        // Add more merchant emails as needed
-      ];
-      
-      return allowedEmails.includes(user.email);
+      console.log('Sign in attempt for:', user.email);
+      // For testing, allow all Google sign-ins
+      // Later you can restrict to specific emails:
+      // const allowedEmails = ['merchant1@gmail.com', 'merchant2@gmail.com'];
+      // return allowedEmails.includes(user.email);
+      return true;
     },
     
     // Customize session data

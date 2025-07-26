@@ -14,13 +14,15 @@ export default function MerchantLoginPage() {
     setError('');
 
     try {
+      console.log('Starting Google sign in...');
       await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/merchant',
         errorCallbackURL: '/merchant/login',
       });
-    } catch (err) {
-      setError('Failed to sign in with Google');
+    } catch (err: any) {
+      console.error('Google sign in error:', err);
+      setError(err?.message || 'Failed to sign in with Google');
       setIsLoading(false);
     }
   };
@@ -39,7 +41,7 @@ export default function MerchantLoginPage() {
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+            <strong>Error:</strong> {error}
           </div>
         )}
 
@@ -70,6 +72,9 @@ export default function MerchantLoginPage() {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Only authorized merchants can access this dashboard
+            </p>
+            <p className="text-xs text-gray-500 mt-2">
+              Make sure you have Google OAuth credentials configured
             </p>
           </div>
         </div>
