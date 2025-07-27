@@ -6,7 +6,7 @@ import { getCurrentMerchant } from 'lib/config';
 
 export const metadata = {
   description:
-    'High-performance ecommerce store built with Next.js, Vercel, and PostgreSQL.',
+    'High-performance ecommerce stores',
   openGraph: {
     type: 'website'
   }
