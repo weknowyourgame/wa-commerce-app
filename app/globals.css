@@ -13,6 +13,191 @@
   }
 }
 
+/* Mobile-only ecommerce website */
+/* Hide desktop elements and force mobile layout for ecommerce pages */
+@media (min-width: 768px) {
+  /* Hide desktop navbar elements */
+  .ecommerce-page .ecommerce-navbar .hidden.md\:block,
+  .ecommerce-page .ecommerce-navbar .hidden.md\:flex,
+  .ecommerce-page .ecommerce-navbar .md\:flex,
+  .ecommerce-page .ecommerce-navbar .md\:block {
+    display: none !important;
+  }
+  
+  /* Force mobile menu to be visible on desktop */
+  .ecommerce-page .ecommerce-navbar .block.flex-none.md\:hidden {
+    display: block !important;
+  }
+  
+  /* Hide desktop search */
+  .ecommerce-page .ecommerce-navbar .hidden.justify-center.md\:flex {
+    display: none !important;
+  }
+  
+  /* Force mobile layout for product pages */
+  .ecommerce-page .lg\:flex-row {
+    flex-direction: column !important;
+  }
+  
+  .ecommerce-page .lg\:basis-4\/6,
+  .ecommerce-page .lg\:basis-2\/6 {
+    flex-basis: 100% !important;
+  }
+  
+  /* Force single column grid */
+  .ecommerce-page .sm\:grid-cols-2,
+  .ecommerce-page .lg\:grid-cols-3 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  /* Force mobile padding */
+  .ecommerce-page .md\:p-12 {
+    padding: 2rem !important;
+  }
+  
+  /* Force mobile container width */
+  .ecommerce-page .max-w-\[--breakpoint-2xl\] {
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Force mobile product grid */
+  .ecommerce-page .min-\[475px\]\:w-1\/2,
+  .ecommerce-page .sm\:w-1\/3,
+  .ecommerce-page .md\:w-1\/4,
+  .ecommerce-page .lg\:w-1\/5 {
+    width: 100% !important;
+  }
+  
+  /* Force mobile carousel */
+  .ecommerce-page .carousel-container {
+    max-width: 100vw !important;
+  }
+  
+  /* Force mobile footer */
+  .ecommerce-page footer {
+    padding: 1rem !important;
+  }
+  
+  /* Force mobile carousel items */
+  .ecommerce-page .md\:w-1\/3 {
+    width: 66.666667% !important;
+  }
+  
+  /* Force mobile three-item grid */
+  .ecommerce-page .md\:grid-cols-6 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  .ecommerce-page .md\:col-span-4,
+  .ecommerce-page .md\:col-span-2 {
+    grid-column: span 1 !important;
+  }
+  
+  .ecommerce-page .md\:row-span-2,
+  .ecommerce-page .md\:row-span-1 {
+    grid-row: span 1 !important;
+  }
+  
+  /* Force mobile product description */
+  .ecommerce-page .text-5xl {
+    font-size: 2rem !important;
+    line-height: 2.5rem !important;
+  }
+  
+  /* Force mobile prose text */
+  .ecommerce-page .text-sm {
+    font-size: 1rem !important;
+  }
+  
+  /* Force mobile button sizes */
+  .ecommerce-page button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Force mobile input sizes */
+  .ecommerce-page input,
+  .ecommerce-page textarea,
+  .ecommerce-page select {
+    font-size: 16px !important;
+    min-height: 48px !important;
+  }
+  
+  /* Force mobile spacing */
+  .ecommerce-page .gap-4 {
+    gap: 1rem !important;
+  }
+  
+  .ecommerce-page .p-4 {
+    padding: 1rem !important;
+  }
+  
+  .ecommerce-page .px-4 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .ecommerce-page .py-4 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  /* Force mobile margins */
+  .ecommerce-page .mb-6 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .ecommerce-page .pb-6 {
+    padding-bottom: 1.5rem !important;
+  }
+  
+  /* Force mobile max heights */
+  .ecommerce-page .lg\:max-h-\[calc\(100vh-200px\)\] {
+    max-height: none !important;
+  }
+}
+
+/* Additional mobile-first styles */
+.ecommerce-page {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.ecommerce-page body {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Ensure touch-friendly buttons */
+.ecommerce-page button,
+.ecommerce-page a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile-specific carousel styles */
+.ecommerce-page .overflow-x-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ecommerce-page .overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-specific grid styles */
+.ecommerce-page .grid {
+  gap: 1rem;
+}
+
+/* Mobile-specific product card styles */
+.ecommerce-page .aspect-square {
+  aspect-ratio: 1;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

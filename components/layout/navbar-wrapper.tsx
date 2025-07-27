@@ -4,7 +4,7 @@ import type { MerchantWithProducts } from 'lib/types';
 import { usePathname } from 'next/navigation';
 import { Navbar } from './navbar';
 
-// Pages that should NOT show the navbar
+// Pages that should NOT show the navbar (merchant pages)
 const NO_NAVBAR_PATHS = [
   '/merchant',
   '/merchant/login',

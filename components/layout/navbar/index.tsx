@@ -17,7 +17,7 @@ const menu = [
 
 export async function Navbar({ merchant }: { merchant: MerchantWithProducts | null }) {
   return (
-    <nav className="relative flex items-center justify-between p-4 lg:px-6">
+    <nav className="relative flex items-center justify-between p-4 lg:px-6 ecommerce-navbar">
       <div className="block flex-none md:hidden">
         <Suspense fallback={null}>
           <MobileMenu menu={menu} merchant={merchant} />
